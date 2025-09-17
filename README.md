@@ -7,12 +7,12 @@
 
 ---
 ## Índice
-- [Descripción](#-descripción-del-proyecto)
-- [Funciones y aplicaciones](#-funciones-y-aplicaciones)
-- [Acceso al proyecto](#-acceso-al-proyecto)
-- [Tecnologías utilizadas](#-tecnologías-utilizadas)
-- [Personas contribuyentes](#-personas-contribuyentes-del-proyecto)
-- [Personas desarrolladoras del proyecto](#-personas-desarrolladoras-del-proyecto)
+- [Descripción](#descripción-del-proyecto)
+- [Funciones y aplicaciones](#funciones-y-aplicaciones)
+- [Acceso al proyecto](#-cceso-al-proyecto)
+- [Tecnologías utilizadas](#tecnologías-utilizadas)
+- [Personas contribuyentes](#personas-contribuyentes-del-proyecto)
+- [Personas desarrolladoras del proyecto](#personas-desarrolladoras-del-proyecto)
 
 ---
 
