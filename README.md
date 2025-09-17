@@ -13,7 +13,7 @@ Spotify es una plataforma de streaming digital que ofrece acceso a millones de c
 
 
 ---
-
+<br></br>
 
 
 ## Funciones y aplicaciones
