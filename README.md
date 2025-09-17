@@ -12,20 +12,6 @@ Spotify es una plataforma de streaming digital que ofrece acceso a millones de c
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Funciones y aplicaciones
 
 ### Recomendaciones y selección
@@ -52,12 +38,13 @@ El reproductor de Spotify es de intuitiva y sencilla usabilidad (pausa, avanzar,
 Spotify permite crear listas de reproducción personalizadas con canciones o pódcasts adaptados a cada momento. Además, puedes usar la función Fusión para combinar los gustos musicales de tu grupo de amigos en una sola lista compartida, o mantener todo en orden gracias a las carpetas de organización, que facilitan clasificar tus colecciones de música y pódcasts.
 
 
-
-
 ---
-
-
-
+<br></br>
+<br></br>
+<br></br>
+<br></br>
+<br></br>
+<br></br>
 
 ## Acceso al proyecto
 - [Página web oficial](https://open.spotify.com/)
