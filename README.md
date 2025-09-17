@@ -14,7 +14,7 @@ Spotify es una plataforma de streaming digital que ofrece acceso a millones de c
 
 ## Funciones y aplicaciones
 
-#### Recomendaciones y selección
+### Recomendaciones y selección
 ![Recomendaciones](./imegenes/spotify_1.png)
 
 Gracias a su sistema de recomendaciones inteligentes, Spotify ayuda a descubrir nueva música todos los días. Ofrece mezclas diarias personalizadas, listas de reproducción que puedan interesarte en base a tus gutos, o las canciones mas escuchadas, además ofrece secciones temáticas clasificadas por generos y artistas. De esta forma, cada usuario encuentra contenido adaptado a sus gustos y preferencias en cada momento.
