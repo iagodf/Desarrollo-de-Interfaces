@@ -46,7 +46,11 @@ Spotify permite crear listas de reproducción personalizadas con canciones o pó
 
 
 ## Tecnologías Utilizadas
-
+- **Lenguajes:** Java, Python, JavaScript, C++
+- **Backend:** microservicios con Kubernetes, APIs REST
+- **Frontend:** React, Android SDK, iOS Swift
+- **Base de datos:** PostgreSQL, Cassandra
+- **Servicios de streaming:** protocolos Ogg Vorbis, ACC, etc
 
 
 ---
