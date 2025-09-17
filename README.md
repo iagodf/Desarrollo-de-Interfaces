@@ -28,7 +28,7 @@ Gracias a su sistema de recomendaciones inteligentes, Spotify ayuda a descubrir 
 ![Reproductor](./imegenes/spotify_2.png)
 
 El reproductor de Spotify es de intuitiva y sencilla usabilidad (pausa, avanzar, retroceder, repetir o reproducción aleatoria) y una interfaz limpia para disfrutar al máximo tu música. También incluye detalles adicionales como la información sobre el artista, álbumes relacionados y créditos de cada canción, enriqueciendo la experiencia de escucha más allá del simple audio.
-
+<br></br>
 
 ### Playlists y organización
 ![Funciones organizativas](./imegenes/spotify_3.png)
