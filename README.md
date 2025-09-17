@@ -6,6 +6,15 @@
 ![Version](https://img.shields.io/badge/VERSION-5.9.1-black?style=flat)
 
 ---
+## Índice
+- [Descripción](#-descripción-del-proyecto)
+- [Funciones y aplicaciones](#-funciones-y-aplicaciones)
+- [Acceso al proyecto](#-acceso-al-proyecto)
+- [Tecnologías utilizadas](#-tecnologías-utilizadas)
+- [Personas contribuyentes](#-personas-contribuyentes-del-proyecto)
+- [Personas desarrolladoras del proyecto](#-personas-desarrolladoras-del-proyecto)
+
+---
 
 ## Descripción del proyecto
 Spotify es una plataforma de streaming digital que ofrece acceso a millones de canciones y pódcasts. Permite escuchar música en cualquier dispositivo, crear listas personalizadas y descubrir nuevos artistas mediante un sistema avanzado de recomendaciones.
