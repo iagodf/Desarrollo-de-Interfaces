@@ -32,3 +32,26 @@ El reproductor de Spotify es de intuitiva y sencilla usabilidad (pausa, avanzar,
 ![Funciones organizativas](./imegenes/spotify_3.png)
 
 Spotify permite crear listas de reproducción personalizadas con canciones o pódcasts adaptados a cada momento. Además, puedes usar la función Fusión para combinar los gustos musicales de tu grupo de amigos en una sola lista compartida, o mantener todo en orden gracias a las carpetas de organización, que facilitan clasificar tus colecciones de música y pódcasts.
+
+
+
+## Acceso al proyecto
+- [Página web oficial](https://open.spotify.com/)
+- [Desacrgar aplicación de escritorio](https://www.spotify.com/es/download/)
+
+
+
+##Tecnologías Utilizadas
+
+
+
+
+## Personas desarrolladoras del proyecto
+- Daniel Ek – Fundador y Desarrollador Principal  
+- Martin Lorentzon – Cofundador  
+- Equipo de Ingeniería de Spotify
+
+
+
+## Personas contribuyentes del proyecto
+- [Iago Donsión Fernández](https://github.com/iagodf)
