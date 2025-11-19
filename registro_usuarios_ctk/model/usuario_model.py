@@ -54,3 +54,12 @@ class GestorUsuarios:
         if 0 <= indice < len(self._usuarios):
             return self._usuarios[indice]
         return None
+
+    def añadir(self, usuario):
+        """
+        Añade un nuevo usuario a la lista.
+
+        Args:
+            usuario (Usuario): El objeto usuario a añadir
+        """
+        self._usuarios.append(usuario)
