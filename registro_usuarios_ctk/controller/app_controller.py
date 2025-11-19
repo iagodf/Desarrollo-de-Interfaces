@@ -3,6 +3,8 @@ from pathlib import Path
 from tkinter import messagebox
 from PIL import Image
 import customtkinter as ctk
+import threading
+import time
 
 from model.usuario_model import Usuario, GestorUsuarios
 from view.main_view import MainView, AddUserView
@@ -18,6 +20,8 @@ class AppController:
 
         self.avatar_images = {}
         self.usuario_seleccionado_idx = None
+        self.auto_guardado_activo = False
+        self.hilo_auto_guardado = None
 
         self.gestor = GestorUsuarios()
         self.view = MainView(master)
@@ -35,7 +39,12 @@ class AppController:
         self.view.menu_archivo.add_command(label="Guardar", command=self.guardar_usuarios)
         self.view.menu_archivo.add_command(label="Cargar", command=self.cargar_usuarios)
         self.view.menu_archivo.add_separator()
-        self.view.menu_archivo.add_command(label="Salir", command=master.quit)
+        self.view.menu_archivo.add_command(
+            label="Activar Auto-guardado",
+            command=self.toggle_auto_guardado
+        )
+        self.view.menu_archivo.add_separator()
+        self.view.menu_archivo.add_command(label="Salir", command=self.salir)
 
         self.cargar_usuarios()
 
@@ -230,3 +239,62 @@ class AppController:
         except Exception as e:
             self.view.actualizar_barra_estado("✗ Error al cargar")
             messagebox.showerror("Error al cargar", f"No se pudieron cargar los usuarios:\n{str(e)}")
+
+    def toggle_auto_guardado(self):
+        if self.auto_guardado_activo:
+            self.detener_auto_guardado()
+        else:
+            self.iniciar_auto_guardado()
+
+    def iniciar_auto_guardado(self):
+        self.auto_guardado_activo = True
+
+        # Actualizar el texto del menú
+        self.view.menu_archivo.entryconfig(
+            3,  # Índice de la opción "Activar Auto-guardado"
+            label="Detener Auto-guardado"
+        )
+
+        # Crear y arrancar el hilo
+        self.hilo_auto_guardado = threading.Thread(
+            target=self._auto_guardar_loop,
+            daemon=True
+        )
+        self.hilo_auto_guardado.start()
+
+        self.view.actualizar_barra_estado("🔄 Auto-guardado activado (cada 10 segundos)")
+
+    def detener_auto_guardado(self):
+        self.auto_guardado_activo = False
+
+        # Actualizar el texto del menú
+        self.view.menu_archivo.entryconfig(
+            3,
+            label="Activar Auto-guardado"
+        )
+
+        self.view.actualizar_barra_estado("⏸️ Auto-guardado detenido")
+
+    def _auto_guardar_loop(self):
+        while self.auto_guardado_activo:
+            time.sleep(10)  # Esperar 10 segundos
+
+            if self.auto_guardado_activo:  # Verificar de nuevo por si se detuvo
+                # Usar after() para ejecutar en el hilo principal
+                self.master.after(0, self._guardar_automatico)
+
+    def _guardar_automatico(self):
+        try:
+            self.gestor.guardar_csv(self.CSV_FILE)
+            self.view.actualizar_barra_estado(
+                f"🔄 Auto-guardado: {time.strftime('%H:%M:%S')}"
+            )
+        except Exception as e:
+            print(f"Error en auto-guardado: {e}")
+
+    def salir(self):
+        # Detener el auto-guardado antes de cerrar
+        if self.auto_guardado_activo:
+            self.detener_auto_guardado()
+
+        self.master.quit()
