@@ -87,7 +87,7 @@ class MainView:
         self.label_genero.pack(pady=5, anchor="w", padx=20)
 
     def actualizar_lista_usuarios(self, usuarios, on_seleccionar_callback):
-        """Actualiza la lista de usuarios mostrada."""
+
         # Limpiar la lista actual
         for widget in self.lista_usuarios_scrollable.winfo_children():
             widget.destroy()
@@ -102,13 +102,7 @@ class MainView:
             btn.pack(fill="x", padx=5, pady=2)
 
     def mostrar_detalles_usuario(self, usuario, avatar_image=None):
-        """
-        Actualiza el panel de detalles con los datos del usuario.
 
-        Args:
-            usuario (Usuario): El objeto usuario a mostrar
-            avatar_image (CTkImage): La imagen del avatar (opcional)
-        """
         if usuario:
             self.label_nombre.configure(text=f"Nombre: {usuario.nombre}")
             self.label_edad.configure(text=f"Edad: {usuario.edad}")
@@ -130,12 +124,7 @@ class AddUserView:
     """Ventana modal para añadir un nuevo usuario."""
 
     def __init__(self, master):
-        """
-        Crea la ventana modal de añadir usuario.
 
-        Args:
-            master: La ventana padre
-        """
         self.window = ctk.CTkToplevel(master)
         self.window.title("Añadir Nuevo Usuario")
         self.window.geometry("350x450")
@@ -242,12 +231,7 @@ class AddUserView:
             )
 
     def get_data(self):
-        """
-        Recoge y devuelve los datos del formulario.
 
-        Returns:
-            dict: Diccionario con los datos del formulario
-        """
         return {
             "nombre": self.nombre_entry.get().strip(),
             "edad": self.edad_entry.get().strip(),

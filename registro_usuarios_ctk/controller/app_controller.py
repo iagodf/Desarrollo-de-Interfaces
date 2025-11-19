@@ -12,12 +12,7 @@ class AppController:
     """Controlador principal de la aplicación."""
 
     def __init__(self, master):
-        """
-        Inicializa el controlador, crea el modelo y la vista, y los conecta.
 
-        Args:
-            master: La ventana raíz de CTk
-        """
         self.master = master
 
         # Configurar rutas del proyecto
@@ -45,12 +40,7 @@ class AppController:
         self.view.actualizar_lista_usuarios(usuarios, self.seleccionar_usuario)
 
     def seleccionar_usuario(self, indice):
-        """
-        Callback que se ejecuta cuando el usuario hace clic en un nombre.
 
-        Args:
-            indice (int): La posición del usuario en la lista
-        """
         usuario = self.gestor.obtener_por_indice(indice)
 
         # Cargar la imagen del avatar si existe
