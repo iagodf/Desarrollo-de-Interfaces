@@ -2,6 +2,7 @@
 import customtkinter as ctk
 from tkinter import filedialog
 from pathlib import Path
+import tkinter
 
 
 class MainView:
@@ -9,6 +10,14 @@ class MainView:
 
     def __init__(self, master):
         self.master = master
+
+        # --- CREAR MENÚ ---
+        self.menubar = tkinter.Menu(master)
+        master.config(menu=self.menubar)
+
+        # Menú Archivo
+        self.menu_archivo = tkinter.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="Archivo", menu=self.menu_archivo)
 
         # Configurar el layout principal con grid (2 columnas)
         master.grid_columnconfigure(0, weight=1)
@@ -87,7 +96,7 @@ class MainView:
         self.label_genero.pack(pady=5, anchor="w", padx=20)
 
     def actualizar_lista_usuarios(self, usuarios, on_seleccionar_callback):
-
+        """Actualiza la lista de usuarios mostrada."""
         # Limpiar la lista actual
         for widget in self.lista_usuarios_scrollable.winfo_children():
             widget.destroy()
@@ -102,7 +111,7 @@ class MainView:
             btn.pack(fill="x", padx=5, pady=2)
 
     def mostrar_detalles_usuario(self, usuario, avatar_image=None):
-
+        """Actualiza el panel de detalles con los datos del usuario."""
         if usuario:
             self.label_nombre.configure(text=f"Nombre: {usuario.nombre}")
             self.label_edad.configure(text=f"Edad: {usuario.edad}")
