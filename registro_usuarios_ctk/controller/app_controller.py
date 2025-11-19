@@ -12,12 +12,13 @@ class AppController:
     """Controlador principal de la aplicación."""
 
     def __init__(self, master):
-
+        """Inicializa el controlador, crea el modelo y la vista, y los conecta."""
         self.master = master
 
         # Configurar rutas del proyecto
         self.BASE_DIR = Path(__file__).resolve().parent.parent
         self.ASSETS_PATH = self.BASE_DIR / "assets"
+        self.CSV_FILE = self.BASE_DIR / "usuarios.csv"
 
         # Cache de imágenes para evitar que se eliminen por el garbage collector
         self.avatar_images = {}
@@ -31,6 +32,28 @@ class AppController:
         # Conectar el botón de añadir usuario
         self.view.btn_añadir.configure(command=self.abrir_ventana_añadir)
 
+        # Conectar las opciones del menú
+        self.view.menu_archivo.add_command(
+            label="Guardar",
+            command=self.guardar_usuarios
+        )
+        self.view.menu_archivo.add_command(
+            label="Cargar",
+            command=self.cargar_usuarios
+        )
+        self.view.menu_archivo.add_separator()
+        self.view.menu_archivo.add_command(
+            label="Salir",
+            command=master.quit
+        )
+
+        # Intentar cargar datos existentes al iniciar
+        self.cargar_usuarios()
+
+        # Si no había datos, mostrar la lista de ejemplo
+        if not self.gestor.listar():
+            self.gestor._cargar_datos_de_ejemplo()
+
         # Poblar la lista inicial
         self.refrescar_lista_usuarios()
 
@@ -40,7 +63,7 @@ class AppController:
         self.view.actualizar_lista_usuarios(usuarios, self.seleccionar_usuario)
 
     def seleccionar_usuario(self, indice):
-
+        """Callback que se ejecuta cuando el usuario hace clic en un nombre."""
         usuario = self.gestor.obtener_por_indice(indice)
 
         # Cargar la imagen del avatar si existe
@@ -52,16 +75,7 @@ class AppController:
         self.view.mostrar_detalles_usuario(usuario, avatar_image)
 
     def _cargar_imagen_avatar(self, ruta_avatar, indice):
-        """
-        Carga una imagen de avatar y la guarda en cache.
-
-        Args:
-            ruta_avatar (str): Ruta al archivo de imagen
-            indice (int): Índice del usuario (para la cache)
-
-        Returns:
-            CTkImage: La imagen cargada o None si falla
-        """
+        """Carga una imagen de avatar y la guarda en cache."""
         try:
             ruta = Path(ruta_avatar)
 
@@ -87,31 +101,20 @@ class AppController:
     def abrir_ventana_añadir(self):
         """Abre la ventana modal para añadir un nuevo usuario."""
         add_view = AddUserView(self.master)
-
-        # Conectar el botón guardar con la función de añadir
         add_view.guardar_button.configure(
             command=lambda: self.añadir_usuario(add_view)
         )
 
     def añadir_usuario(self, add_view):
-        """
-        Procesa los datos del formulario y añade el usuario.
-
-        Args:
-            add_view (AddUserView): La instancia de la ventana modal
-        """
-        # Obtener los datos del formulario
+        """Procesa los datos del formulario y añade el usuario."""
         datos = add_view.get_data()
 
-        # Validar que el nombre no esté vacío
+        # Validar nombre
         if not datos["nombre"]:
-            messagebox.showerror(
-                "Error",
-                "El nombre es obligatorio"
-            )
+            messagebox.showerror("Error", "El nombre es obligatorio")
             return
 
-        # Validar y convertir la edad
+        # Validar edad
         try:
             edad = int(datos["edad"])
             if edad <= 0 or edad > 150:
@@ -145,3 +148,35 @@ class AppController:
             "Éxito",
             f"Usuario '{datos['nombre']}' añadido correctamente"
         )
+
+    def guardar_usuarios(self):
+        """Guarda la lista de usuarios en un archivo CSV."""
+        try:
+            self.gestor.guardar_csv(self.CSV_FILE)
+            messagebox.showinfo(
+                "Éxito",
+                f"Usuarios guardados correctamente en:\n{self.CSV_FILE.name}"
+            )
+        except Exception as e:
+            messagebox.showerror(
+                "Error al guardar",
+                f"No se pudieron guardar los usuarios:\n{str(e)}"
+            )
+
+    def cargar_usuarios(self):
+        """Carga la lista de usuarios desde un archivo CSV."""
+        try:
+            self.gestor.cargar_csv(self.CSV_FILE)
+            self.refrescar_lista_usuarios()
+            messagebox.showinfo(
+                "Éxito",
+                f"Usuarios cargados correctamente desde:\n{self.CSV_FILE.name}"
+            )
+        except FileNotFoundError:
+            # No mostrar error si es la primera vez (no existe el archivo)
+            print(f"Archivo {self.CSV_FILE.name} no encontrado. Se usarán datos de ejemplo.")
+        except Exception as e:
+            messagebox.showerror(
+                "Error al cargar",
+                f"No se pudieron cargar los usuarios:\n{str(e)}"
+            )
