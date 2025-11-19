@@ -1,4 +1,4 @@
-# controller/app_controller.py
+
 from pathlib import Path
 from tkinter import messagebox
 from PIL import Image
@@ -9,82 +9,158 @@ from view.main_view import MainView, AddUserView
 
 
 class AppController:
-    """Controlador principal de la aplicación."""
-
     def __init__(self, master):
-        """Inicializa el controlador, crea el modelo y la vista, y los conecta."""
         self.master = master
 
-        # Configurar rutas del proyecto
         self.BASE_DIR = Path(__file__).resolve().parent.parent
         self.ASSETS_PATH = self.BASE_DIR / "assets"
         self.CSV_FILE = self.BASE_DIR / "usuarios.csv"
 
-        # Cache de imágenes para evitar que se eliminen por el garbage collector
         self.avatar_images = {}
+        self.usuario_seleccionado_idx = None
 
-        # Crear el modelo (la lógica de negocio)
         self.gestor = GestorUsuarios()
-
-        # Crear la vista (la interfaz gráfica)
         self.view = MainView(master)
 
-        # Conectar el botón de añadir usuario
+        # Conectar botones
         self.view.btn_añadir.configure(command=self.abrir_ventana_añadir)
+        self.view.btn_editar.configure(command=self.editar_usuario)
+        self.view.btn_eliminar.configure(command=self.eliminar_usuario)
 
-        # Conectar las opciones del menú
-        self.view.menu_archivo.add_command(
-            label="Guardar",
-            command=self.guardar_usuarios
-        )
-        self.view.menu_archivo.add_command(
-            label="Cargar",
-            command=self.cargar_usuarios
-        )
+        # Conectar búsqueda y filtro
+        self.view.busqueda_var.trace_add("write", lambda *args: self.aplicar_filtros())
+        self.view.filtro_genero_var.trace_add("write", lambda *args: self.aplicar_filtros())
+
+        # Menú
+        self.view.menu_archivo.add_command(label="Guardar", command=self.guardar_usuarios)
+        self.view.menu_archivo.add_command(label="Cargar", command=self.cargar_usuarios)
         self.view.menu_archivo.add_separator()
-        self.view.menu_archivo.add_command(
-            label="Salir",
-            command=master.quit
-        )
+        self.view.menu_archivo.add_command(label="Salir", command=master.quit)
 
-        # Intentar cargar datos existentes al iniciar
         self.cargar_usuarios()
 
-        # Si no había datos, mostrar la lista de ejemplo
         if not self.gestor.listar():
             self.gestor._cargar_datos_de_ejemplo()
 
-        # Poblar la lista inicial
         self.refrescar_lista_usuarios()
+        self.actualizar_estadisticas()
+
+    def aplicar_filtros(self):
+        texto_busqueda = self.view.busqueda_var.get()
+        filtro_genero = self.view.filtro_genero_var.get()
+
+        usuarios_filtrados = self.gestor.buscar_y_filtrar(texto_busqueda, filtro_genero)
+
+        self.view.actualizar_lista_usuarios(
+            usuarios_filtrados,
+            self.seleccionar_usuario,
+            self.editar_usuario_doble_clic
+        )
+
+        self.view.actualizar_barra_estado(
+            f"Mostrando {len(usuarios_filtrados)} de {len(self.gestor.listar())} usuarios"
+        )
 
     def refrescar_lista_usuarios(self):
-        """Obtiene los usuarios del modelo y actualiza la vista."""
-        usuarios = self.gestor.listar()
-        self.view.actualizar_lista_usuarios(usuarios, self.seleccionar_usuario)
+        self.aplicar_filtros()
 
     def seleccionar_usuario(self, indice):
-        """Callback que se ejecuta cuando el usuario hace clic en un nombre."""
-        usuario = self.gestor.obtener_por_indice(indice)
+        # Obtener el usuario del conjunto FILTRADO
+        texto_busqueda = self.view.busqueda_var.get()
+        filtro_genero = self.view.filtro_genero_var.get()
+        usuarios_filtrados = self.gestor.buscar_y_filtrar(texto_busqueda, filtro_genero)
 
-        # Cargar la imagen del avatar si existe
-        avatar_image = None
-        if usuario and usuario.avatar:
-            avatar_image = self._cargar_imagen_avatar(usuario.avatar, indice)
+        if indice < len(usuarios_filtrados):
+            usuario = usuarios_filtrados[indice]
+            # Buscar el índice real en la lista completa
+            self.usuario_seleccionado_idx = self.gestor.listar().index(usuario)
 
-        # Mostrar los detalles
-        self.view.mostrar_detalles_usuario(usuario, avatar_image)
+            avatar_image = None
+            if usuario.avatar:
+                avatar_image = self._cargar_imagen_avatar(usuario.avatar, self.usuario_seleccionado_idx)
+
+            self.view.mostrar_detalles_usuario(usuario, avatar_image)
+
+    def editar_usuario_doble_clic(self, indice):
+        self.seleccionar_usuario(indice)
+        self.editar_usuario()
+
+    def editar_usuario(self):
+        if self.usuario_seleccionado_idx is None:
+            return
+
+        usuario_actual = self.gestor.obtener_por_indice(self.usuario_seleccionado_idx)
+
+        edit_view = AddUserView(self.master, usuario_actual)
+        edit_view.guardar_button.configure(
+            command=lambda: self.guardar_edicion(edit_view)
+        )
+
+    def guardar_edicion(self, edit_view):
+        datos = edit_view.get_data()
+
+        if not datos["nombre"]:
+            messagebox.showerror("Error", "El nombre es obligatorio")
+            return
+
+        try:
+            edad = int(datos["edad"])
+            if edad <= 0 or edad > 150:
+                raise ValueError("Edad fuera de rango")
+        except ValueError:
+            messagebox.showerror("Error", "La edad debe ser un número válido entre 1 y 150")
+            return
+
+        usuario_actualizado = Usuario(
+            nombre=datos["nombre"],
+            edad=edad,
+            genero=datos["genero"],
+            avatar=datos["avatar"]
+        )
+
+        self.gestor.actualizar(self.usuario_seleccionado_idx, usuario_actualizado)
+        self.refrescar_lista_usuarios()
+        self.actualizar_estadisticas()
+
+        edit_view.window.destroy()
+
+        messagebox.showinfo("Éxito", f"Usuario '{datos['nombre']}' actualizado correctamente")
+
+    def eliminar_usuario(self):
+        if self.usuario_seleccionado_idx is None:
+            return
+
+        usuario = self.gestor.obtener_por_indice(self.usuario_seleccionado_idx)
+
+        confirmar = messagebox.askyesno(
+            "Confirmar eliminación",
+            f"¿Estás seguro de que quieres eliminar a '{usuario.nombre}'?"
+        )
+
+        if confirmar:
+            self.gestor.eliminar(self.usuario_seleccionado_idx)
+            self.usuario_seleccionado_idx = None
+            self.view.mostrar_detalles_usuario(None)
+            self.refrescar_lista_usuarios()
+            self.actualizar_estadisticas()
+
+            messagebox.showinfo("Éxito", "Usuario eliminado correctamente")
+
+    def actualizar_estadisticas(self):
+        total = len(self.gestor.listar())
+        conteo = self.gestor.contar_por_genero()
+
+        mensaje = f"Total: {total} | M: {conteo['Masculino']} | F: {conteo['Femenino']} | Otro: {conteo['Otro']}"
+        self.view.actualizar_barra_estado(mensaje)
 
     def _cargar_imagen_avatar(self, ruta_avatar, indice):
-        """Carga una imagen de avatar y la guarda en cache."""
         try:
             ruta = Path(ruta_avatar)
 
-            # Si no es ruta absoluta, buscar en assets
             if not ruta.is_absolute():
                 ruta = self.ASSETS_PATH / ruta_avatar
 
             if ruta.exists():
-                # Cargar y guardar en cache
                 img = Image.open(ruta)
                 ctk_image = ctk.CTkImage(
                     light_image=img,
@@ -99,34 +175,26 @@ class AppController:
         return None
 
     def abrir_ventana_añadir(self):
-        """Abre la ventana modal para añadir un nuevo usuario."""
         add_view = AddUserView(self.master)
         add_view.guardar_button.configure(
             command=lambda: self.añadir_usuario(add_view)
         )
 
     def añadir_usuario(self, add_view):
-        """Procesa los datos del formulario y añade el usuario."""
         datos = add_view.get_data()
 
-        # Validar nombre
         if not datos["nombre"]:
             messagebox.showerror("Error", "El nombre es obligatorio")
             return
 
-        # Validar edad
         try:
             edad = int(datos["edad"])
             if edad <= 0 or edad > 150:
                 raise ValueError("Edad fuera de rango")
         except ValueError:
-            messagebox.showerror(
-                "Error",
-                "La edad debe ser un número válido entre 1 y 150"
-            )
+            messagebox.showerror("Error", "La edad debe ser un número válido entre 1 y 150")
             return
 
-        # Crear el nuevo usuario
         nuevo_usuario = Usuario(
             nombre=datos["nombre"],
             edad=edad,
@@ -134,49 +202,31 @@ class AppController:
             avatar=datos["avatar"]
         )
 
-        # Añadir al modelo
         self.gestor.añadir(nuevo_usuario)
-
-        # Refrescar la lista
         self.refrescar_lista_usuarios()
+        self.actualizar_estadisticas()
 
-        # Cerrar la ventana modal
         add_view.window.destroy()
 
-        # Mensaje de confirmación
-        messagebox.showinfo(
-            "Éxito",
-            f"Usuario '{datos['nombre']}' añadido correctamente"
-        )
+        messagebox.showinfo("Éxito", f"Usuario '{datos['nombre']}' añadido correctamente")
 
     def guardar_usuarios(self):
-        """Guarda la lista de usuarios en un archivo CSV."""
         try:
             self.gestor.guardar_csv(self.CSV_FILE)
-            messagebox.showinfo(
-                "Éxito",
-                f"Usuarios guardados correctamente en:\n{self.CSV_FILE.name}"
-            )
+            self.view.actualizar_barra_estado(f"✓ Guardado en {self.CSV_FILE.name}")
+            messagebox.showinfo("Éxito", f"Usuarios guardados correctamente")
         except Exception as e:
-            messagebox.showerror(
-                "Error al guardar",
-                f"No se pudieron guardar los usuarios:\n{str(e)}"
-            )
+            self.view.actualizar_barra_estado("✗ Error al guardar")
+            messagebox.showerror("Error al guardar", f"No se pudieron guardar los usuarios:\n{str(e)}")
 
     def cargar_usuarios(self):
-        """Carga la lista de usuarios desde un archivo CSV."""
         try:
             self.gestor.cargar_csv(self.CSV_FILE)
             self.refrescar_lista_usuarios()
-            messagebox.showinfo(
-                "Éxito",
-                f"Usuarios cargados correctamente desde:\n{self.CSV_FILE.name}"
-            )
+            self.actualizar_estadisticas()
+            self.view.actualizar_barra_estado(f"✓ Cargado desde {self.CSV_FILE.name}")
         except FileNotFoundError:
-            # No mostrar error si es la primera vez (no existe el archivo)
-            print(f"Archivo {self.CSV_FILE.name} no encontrado. Se usarán datos de ejemplo.")
+            print(f"Archivo {self.CSV_FILE.name} no encontrado.")
         except Exception as e:
-            messagebox.showerror(
-                "Error al cargar",
-                f"No se pudieron cargar los usuarios:\n{str(e)}"
-            )
+            self.view.actualizar_barra_estado("✗ Error al cargar")
+            messagebox.showerror("Error al cargar", f"No se pudieron cargar los usuarios:\n{str(e)}")
